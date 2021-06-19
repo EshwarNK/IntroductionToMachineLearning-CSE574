@@ -1,0 +1,64 @@
+    obj_val = 0
+    training_data_1 =  np.concatenate((train_data,np.ones((train_data.shape[0],1))),axis=1)
+    w1_T_t1 = np.dot(training_data_1,np.transpose(W1))
+    prediction_1 = sigmoid(w1_T_t1)
+    training_data_2 = np.concatenate((prediction_1,np.ones((prediction_1.shape[0],1))),axis=1)
+    w2_T_t2 = np.dot(training_data_2,np.transpose(W2))
+    prediction_2 = sigmoid(w2_T_t2)
+    y_predicted = np.zeros((train_data.shape[0],n_class))
+    for i in range(0,train_label.shape[0]):
+        y_predicted[i][(int)(train_label[i])]=1
+    first_part_of_eq5 = np.multiply(y_predicted,np.log(prediction_2))
+    second_part_of_eq5 = np.multiply(np.subtract(1,y_predicted),np.log(np.subtract(1,prediction_2)))
+
+    eq5 = np.divide(np.sum(np.add(first_part_of_eq5,second_part_of_eq5)),(-1*train_data.shape[0]))
+    regularized_term = (lambdaval/(2*train_data.shape[0]))*(np.add(np.sum(np.square(W1)),np.sum(np.square(W2))))
+    obj_val = eq5 + regularized_term
+
+
+    # #adding bias term to the train_data
+    # bias1 = np.ones(train_data.shape[0],1)
+    # train_data_1 = np.append(train_data,bias1,1)
+
+    # #feed forwarding through 1st layer
+    # W1_t = np.transpose(W1)
+    # first_prediction = np.dot(train_data,W1_t)
+    # sigmoid_of_first_prediction = sigmoid(first_prediction)
+
+    # #adding bias term for further propogation
+    # bias2 = np.ones(sigmoid_of_first_prediction.shape[0],1)
+    # train_data_2 = np.append(sigmoid_of_first_prediction,bias2,1)
+
+    # #feed forwarding through 1st layer
+    # W2_t = np.transpose(W2)
+    # second_prediction = np.dot(train_data_2,W2_t)
+    # final_prediction = sigmoid(second_prediction)
+
+    # #1-k encoding of train_label
+    # y_predicted = np.zeros(train_data.shape[0],n_class)
+
+    # i = 0
+    # for i in range(train_label.shape[0]):y_predicted[i][train_label[i]]=1
+
+    # obj_val = np.sum(np.sum(np.multiply(y_predicted,np.log(final_prediction)),np.multiply(np.subtract(1,y_predicted),np.log(np.subtract(1,final_prediction))))/(-1*train_data.shape[0]),np.multiply(lambdaval/(2*train_data.shape[0]),np.sum(np.sum(W1**2),np.sum(W2**2))))
+
+    obj_grad = params
+    lambda_l = np.subtract(prediction_2,y_predicted)
+
+    gradient_2 = np.dot(np.transpose(lambda_l),training_data_2)
+    regularized_gradient_2 = np.divide(np.add(gradient_2,np.multiply(lambdaval,W2)), train_data.shape[0])
+
+    #training_data_2 = training_data_2[:,0:training_data_2.shape[1]-1]
+    eq12 = np.multiply(np.multiply(np.subtract(1,prediction_1),prediction_1),np.dot(lambda_l,W2[:,0:W2.shape[1]-1]))
+    gradient_1 = np.dot(np.transpose(eq12),training_data_1)
+    #gradient_1 = gradient_1[:,0:gradient_1.shape[1]-1]
+    regularized_gradient_1 = np.divide(np.add(gradient_1,np.multiply(lambdaval,W1)), train_data.shape[0])
+
+    obj_grad = np.concatenate((regularized_gradient_1.flatten(),regularized_gradient_2.flatten()),0)
+
+    # gradient_2 = np.divide(np.sum(np.dot(np.transpose(np.subtract(final_prediction,y_predicted)),train_data_2),np.multiply(lambdaval,W2)),train_data.shape[0])
+
+    # gradient_1 = np.divide(np.sum(np.dot(np.transpose(np.dot(np.dot(np.subtract(final_prediction,y_predicted),W2),np.dot(train_data_2,np.subtract(1,train_data_2)))),train_data_1),np.multiply(lambdaval,W1)),train_data.shape[0])
+
+    return (obj_val,obj_grad)
+	
